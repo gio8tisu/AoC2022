@@ -1,0 +1,7 @@
+default:
+	@just resolve 1 input.txt
+	@just resolve 2 input.txt
+
+resolve part file:
+	@echo -n {{file}} '(Part {{part}}): '
+	@python3 main.py --part {{part}} {{file}}
