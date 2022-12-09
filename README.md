@@ -2,7 +2,7 @@
 
 This are my AoC solutions using (typed) Python and mostly using test-driven development.
 
-Solutions can be easily executed using [https://github.com/casey/just](`just` command runner)
+Solutions can be easily executed using [`just` command runner](https://github.com/casey/just)
 (can be installed with `cargo install just`).
 
 Examples:
