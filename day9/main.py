@@ -23,9 +23,12 @@ class Motion(NamedTuple):
 
 
 def main(motions_file: TextIO, part: int):
+    motions = read_motions(motions_file)
     if part == 1:
-        motions = read_motions(motions_file)
-        visited_positions = find_visited_positions(motions)
+        visited_positions = find_visited_positions(motions, 2)
+        print(len(visited_positions))
+    elif part == 2:
+        visited_positions = find_visited_positions(motions, 10)
         print(len(visited_positions))
     else:
         raise ValueError(f"Invalid part: {part}")
@@ -39,22 +42,22 @@ def read_motions(motions_file: TextIO) -> list[Motion]:
     return motions
 
 
-def find_visited_positions(motions: list[Motion]) -> set[Position]:
+def find_visited_positions(motions: list[Motion], num_knots: int) -> set[Position]:
     visited_positions = set()
-    head_position = Position(0, 0)
-    tail_position = Position(0, 0)
+    knot_positions = [Position(0, 0) for _ in range(num_knots)]
     for motion in motions:
-        head_position, tail_position = do_motion(
-            head_position, tail_position, motion, visited_positions)
+        do_motion(knot_positions, motion, visited_positions)
     return visited_positions
 
 
-def do_motion(head_position: Position, tail_position: Position, motion: Motion, visited_positions: set[Position]) -> tuple[Position, Position]:
+def do_motion(knot_positions: list[Position], motion: Motion, visited_positions: set[Position]):
     for _ in range(motion.length):
-        head_position = move_head(head_position, motion.direction)
-        tail_position = move_tail(tail_position, head_position)
-        visited_positions.add(tail_position)
-    return head_position, tail_position
+        for i in range(len(knot_positions)):
+            if i == 0:
+                knot_positions[i] = move_head(knot_positions[i], motion.direction)
+            else:
+                knot_positions[i] = move_knot(knot_positions[i], knot_positions[i - 1])
+        visited_positions.add(knot_positions[-1])
 
 
 def move_head(head_position: Position, direction: Direction) -> Position:
@@ -70,27 +73,27 @@ def move_head(head_position: Position, direction: Direction) -> Position:
         raise ValueError(f"Invalid direction: {direction}")
 
 
-def move_tail(tail_position: Position, head_position: Position) -> Position:
-    diff_x, diff_y = head_position.x - tail_position.x, head_position.y - tail_position.y
+def move_knot(knot_position: Position, head_position: Position) -> Position:
+    diff_x, diff_y = head_position.x - knot_position.x, head_position.y - knot_position.y
     if sqrt(diff_x ** 2 + diff_y ** 2) < 2:
-        return tail_position
+        return knot_position
     if diff_x == 0:
         if diff_y > 0:
-            return Position(tail_position.x, tail_position.y + 1)
+            return Position(knot_position.x, knot_position.y + 1)
         else:
-            return Position(tail_position.x, tail_position.y - 1)
+            return Position(knot_position.x, knot_position.y - 1)
     if diff_y == 0:
         if diff_x > 0:
-            return Position(tail_position.x + 1, tail_position.y)
+            return Position(knot_position.x + 1, knot_position.y)
         else:
-            return Position(tail_position.x - 1, tail_position.y)
+            return Position(knot_position.x - 1, knot_position.y)
     if diff_x > 0 and diff_y > 0:
-        return Position(tail_position.x + 1, tail_position.y + 1)
+        return Position(knot_position.x + 1, knot_position.y + 1)
     if diff_x > 0 and diff_y < 0:
-        return Position(tail_position.x + 1, tail_position.y - 1)
+        return Position(knot_position.x + 1, knot_position.y - 1)
     if diff_x < 0 and diff_y > 0:
-        return Position(tail_position.x - 1, tail_position.y + 1)
-    return Position(tail_position.x - 1, tail_position.y - 1)
+        return Position(knot_position.x - 1, knot_position.y + 1)
+    return Position(knot_position.x - 1, knot_position.y - 1)
 
 
 if __name__ == "__main__":
