@@ -13,32 +13,36 @@ class Monkey:
     inspected_items: int = 0
 
 
-NUM_ROUNDS = 20
+NUM_ROUNDS_PART_1 = 20
+NUM_ROUNDS_PART_2 = 10000
+MODULO = 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19
 
 
 def main(notes_file: TextIO, part: int):
+    monkeys = read_notes(notes_file)
     if part == 1:
-        monkeys = read_notes(notes_file)
-        play_game(monkeys)
-        level = find_level_of_monkey_bussines(monkeys)
-        print(level)
+        play_game(monkeys, NUM_ROUNDS_PART_1, lambda x: x // 3)
+    elif part == 2:
+        play_game(monkeys, NUM_ROUNDS_PART_2, lambda x: x % MODULO)
     else:
         raise ValueError(f"Invalid part: {part}")
+    level = find_level_of_monkey_bussines(monkeys)
+    print(level)
 
 
-def play_game(monkeys: list[Monkey]):
-    for _ in range(NUM_ROUNDS):
+def play_game(monkeys: list[Monkey], num_rounds: int, manage_worry: Callable[[int], int]):
+    for _ in range(num_rounds):
         for monkey in monkeys:
             monkey_items, monkey.items = monkey.items, []
             for item in monkey_items:
                 new_item = monkey.operation(item)
-                new_item = new_item // 3
+                new_item = manage_worry(new_item)
                 test = monkey.test(new_item)
                 monkeys[monkey.throw(test)].items.append(new_item)
                 monkey.inspected_items += 1
 
 
-def find_level_of_monkey_bussines(monkeys: list[Monkey], top=2) -> int:
+def find_level_of_monkey_bussines(monkeys: list[Monkey]) -> int:
     sorted_monkeys = sorted(monkeys, key=lambda monkey: monkey.inspected_items, reverse=True)
     return sorted_monkeys[0].inspected_items * sorted_monkeys[1].inspected_items
 
