@@ -1,6 +1,6 @@
 import unittest
 
-from main import parse_height, parse_height_map, Coordinate
+from main import parse_height, parse_height_map_part_1, Coordinate
 
 
 class TestParseChar(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestCoordinate(unittest.TestCase):
 class TestFunctional(unittest.TestCase):
     def test_parse_height_map(self):
         with open("example.txt", "r") as f:
-            height_map, source_coordinates, target_coordinates = parse_height_map(f)
+            height_map, source_coordinates, target_coordinates = parse_height_map_part_1(f)
         self.assertEqual(source_coordinates, Coordinate(0, 0))
         self.assertEqual(target_coordinates, Coordinate(2, 5))
         self.assertEqual(len(height_map), 5)

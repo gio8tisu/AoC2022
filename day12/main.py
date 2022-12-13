@@ -19,9 +19,15 @@ class Coordinate:
 
 def main(height_map_file: TextIO, part: int):
     if part == 1:
-        height_map, source_coordinates, target_coordinates = parse_height_map(height_map_file)
+        height_map, source_coordinates, target_coordinates = parse_height_map_part_1(height_map_file)
         shortest_path_distance = find_shortest_path(height_map, source_coordinates, target_coordinates)
         print(shortest_path_distance)
+    elif part == 2:
+        height_map, sources_coordinates, target_coordinates = parse_height_map_part_2(height_map_file)
+        shortest_path_distances = []
+        for source_coordinates in sources_coordinates:
+            shortest_path_distances.append(find_shortest_path(height_map, source_coordinates, target_coordinates))
+        print(min(shortest_path_distances))
     else:
         raise ValueError(f"Invalid part: {part}")
 
@@ -62,7 +68,7 @@ def find_shortest_path(height_map: list[list[int]], source: Coordinate, target_c
     return D[target_coordinate.row][target_coordinate.col]
 
 
-def parse_height_map(height_map_file: TextIO) -> tuple[list[list[int]], Coordinate, Coordinate]:
+def parse_height_map_part_1(height_map_file: TextIO) -> tuple[list[list[int]], Coordinate, Coordinate]:
     height_map = []
     source = None
     target = None
@@ -77,6 +83,23 @@ def parse_height_map(height_map_file: TextIO) -> tuple[list[list[int]], Coordina
     if source is None or target is None:
         raise ValueError("Missing source or target")
     return height_map, source, target
+
+
+def parse_height_map_part_2(height_map_file: TextIO) -> tuple[list[list[int]], list[Coordinate], Coordinate]:
+    height_map = []
+    sources = []
+    target = None
+    for row, line in enumerate(height_map_file.readlines()):
+        height_map.append([])
+        for col, char in enumerate(line.strip("\n")):
+            if char == "S" or char == "a":
+                sources.append(Coordinate(row, col))
+            elif char == "E":
+                target = Coordinate(row, col)
+            height_map[-1].append(parse_height(char))
+    if not sources or target is None:
+        raise ValueError("Missing source or target")
+    return height_map, sources, target
 
 
 def parse_height(char: str):
