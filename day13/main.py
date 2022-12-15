@@ -1,6 +1,7 @@
 import argparse
 import sys
 from typing import TextIO, Generator, TypeAlias, Iterable, Union
+from itertools import chain
 
 
 Packet: TypeAlias = list[Union[int, "Packet"]]
@@ -8,16 +9,22 @@ Packet: TypeAlias = list[Union[int, "Packet"]]
 
 def main(packets_file: TextIO, part: int):
     if part == 1:
-        packet_pairs = read_packets(packets_file)
+        packet_pairs = read_packets_part_1(packets_file)
         packets_in_right_order = find_packets_in_right_order(packet_pairs)
         print(sum(packets_in_right_order))
     elif part == 2:
-        raise NotImplementedError("Part 2 not implemented")
+        packet_pairs = read_packets_part_2(packets_file)
+        packet_pairs.append([[2]])
+        packet_pairs.append([[6]])
+        sort_packets(packet_pairs)
+        divider_packets_indices = find_divider_packets(packet_pairs)
+        assert len(divider_packets_indices) == 2
+        print(divider_packets_indices[0] * divider_packets_indices[1])
     else:
         raise ValueError(f"Invalid part: {part}")
 
 
-def read_packets(packets_file: TextIO) -> Generator[tuple[Packet, Packet], None, None]:
+def read_packets_part_1(packets_file: TextIO) -> Generator[tuple[Packet, Packet], None, None]:
     left = right = None
     for line in packets_file.readlines():
         if line == "\n":
@@ -34,6 +41,15 @@ def read_packets(packets_file: TextIO) -> Generator[tuple[Packet, Packet], None,
         yield left, right
 
 
+def read_packets_part_2(packets_file: TextIO) -> list[Packet]:
+    packets = []
+    for line in packets_file.readlines():
+        if line == "\n":
+            continue
+        packets.append(parse_packet(line.strip()))
+    return packets
+
+
 def parse_packet(packet: str) -> Packet:
     return eval(packet)
 
@@ -44,6 +60,18 @@ def find_packets_in_right_order(packet_pairs: Iterable[tuple[Packet, Packet]]) -
         if is_packet_in_right_order(left, right):
             ordered_indices.append(i)
     return ordered_indices
+
+
+def sort_packets(packet_pairs: list[Packet]):
+    # Bubble sort.
+    while True:
+        swapped = False
+        for i in range(len(packet_pairs) - 1):
+            if not is_packet_in_right_order(packet_pairs[i], packet_pairs[i + 1]):
+                packet_pairs[i], packet_pairs[i + 1] = packet_pairs[i + 1], packet_pairs[i]
+                swapped = True
+        if not swapped:
+            break
 
 
 def is_packet_in_right_order(left: Packet, right: Packet) -> bool | None:
@@ -61,6 +89,20 @@ def is_packet_in_right_order(left: Packet, right: Packet) -> bool | None:
             return is_ordered
     if len(left) != len(right):
         return len(left) < len(right)
+
+
+def find_divider_packets(packets: list[Packet]) -> list[int]:
+    divider_packets = []
+    for i, packet in enumerate(packets, start=1):
+        if is_divider_packet(packet):
+            divider_packets.append(i)
+    return divider_packets
+
+
+def is_divider_packet(packet: Packet) -> bool:
+    if isinstance(packet, int):
+        return False
+    return packet == [[2]] or packet == [[6]]
 
 
 if __name__ == "__main__":

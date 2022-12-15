@@ -1,6 +1,6 @@
 import unittest
 
-from main import parse_packet, is_packet_in_right_order
+from main import parse_packet, is_packet_in_right_order, is_divider_packet, sort_packets
 
 
 class TestParsePacket(unittest.TestCase):
@@ -73,8 +73,8 @@ class TestIsPacketInRightOrder(unittest.TestCase):
         self.assertTrue(is_packet_in_right_order(left, right))
 
     def test_pair_5(self):
-        left = [7,7,7,7]
-        right = [7,7,7]
+        left = [7, 7, 7, 7]
+        right = [7, 7, 7]
         self.assertFalse(is_packet_in_right_order(left, right))
 
     def test_pair_6(self):
@@ -91,6 +91,66 @@ class TestIsPacketInRightOrder(unittest.TestCase):
         left = [[]]
         right = []
         self.assertFalse(is_packet_in_right_order(left, right))
+
+
+class TestIsDividerPacket(unittest.TestCase):
+    def test_is_divider_2_true(self):
+        packet = [[2]]
+        self.assertTrue(is_divider_packet(packet))
+
+    def test_is_divider_6_true(self):
+        packet = [[6]]
+        self.assertTrue(is_divider_packet(packet))
+
+    def test_is_divider_other_false(self):
+        packet = [6]
+        self.assertFalse(is_divider_packet(packet))
+
+
+class TestSortPackets(unittest.TestCase):
+    def test_example(self):
+        packets = [
+            [1, 1, 3, 1, 1],
+            [1, 1, 5, 1, 1],
+            [[1], [2, 3, 4]],
+            [[1], 4],
+            [9],
+            [[8, 7, 6]],
+            [[4, 4], 4, 4],
+            [[4, 4], 4, 4, 4],
+            [7, 7, 7, 7],
+            [7, 7, 7],
+            [],
+            [3],
+            [[[]]],
+            [[]],
+            [1, [2, [3, [4, [5, 6, 7]]]], 8, 9],
+            [1, [2, [3, [4, [5, 6, 0]]]], 8, 9],
+            [[2]],
+            [[6]]
+        ]
+        expected = [
+            [],
+            [[]],
+            [[[]]],
+            [1, 1, 3, 1, 1],
+            [1, 1, 5, 1, 1],
+            [[1], [2, 3, 4]],
+            [1, [2, [3, [4, [5, 6, 0]]]], 8, 9],
+            [1, [2, [3, [4, [5, 6, 7]]]], 8, 9],
+            [[1], 4],
+            [[2]],
+            [3],
+            [[4, 4], 4, 4],
+            [[4, 4], 4, 4, 4],
+            [[6]],
+            [7, 7, 7],
+            [7, 7, 7, 7],
+            [[8, 7, 6]],
+            [9]
+        ]
+        sort_packets(packets)
+        self.assertEqual(packets, expected)
 
 
 if __name__ == "__main__":
